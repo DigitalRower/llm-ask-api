@@ -8,7 +8,7 @@ API key management.
 
 ## Live demo
 
-Base URL: `https://your-app-name.onrender.com`
+Base URL: `https://llm-ask-api.onrender.com/`
 
 > **Note on cold starts:** The free Render tier sleeps after 15 minutes 
 > of inactivity. First request after idle takes 30–60 seconds. 
@@ -25,6 +25,8 @@ Exposes two endpoints:
 
 Both call the Anthropic Claude API and return a JSON response containing 
 the original question and Claude's answer.
+
+![FastAPI Interactive Documentation Demo](./assets/fastapi-docs-demo.png)
 
 ---
 
@@ -99,7 +101,8 @@ Returns a Claude-generated answer to a question passed as a query parameter.
 
 **Example — browser:**
 
-    https://your-app-name.onrender.com/ask?q=what+is+fastapi
+    https://llm-ask-api.onrender.com/ask?q=what+is+fastapi
+ 
 
 ---
 
@@ -127,7 +130,7 @@ Returns a Claude-generated answer to a question passed as a JSON body.
 
 **Example — curl:**
 
-    curl -X POST https://your-app-name.onrender.com/ask \
+    curl -X POST https://llm-ask-api.onrender.com/ask \
       -H "Content-Type: application/json" \
       -d '{"text": "what is retrieval augmented generation"}'
 
@@ -137,7 +140,7 @@ Returns a Claude-generated answer to a question passed as a JSON body.
 import requests
 
 response = requests.post(
-    "https://your-app-name.onrender.com/ask",
+    "https://llm-ask-api.onrender.com/ask",
     json={"text": "what is retrieval augmented generation"}
 )
 print(response.json()["answer"])
