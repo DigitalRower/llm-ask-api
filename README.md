@@ -1,8 +1,10 @@
-# llm-ask-api 
+# LLM Ask API — Claude-Powered Question Answering Service
 
-A FastAPI service that accepts questions and returns answers generated 
-by Claude (Anthropic). Deployed on Render with environment-variable-based 
-API key management.
+A production-ready REST API built with FastAPI that wraps Anthropic's Claude to answer natural language questions. Deployed on Render with environment variable security and structured JSON responses.
+
+![FastAPI interactive docs showing GET and POST /ask endpoints](./assets/fastapi-docs-demo.png)
+
+*FastAPI's auto-generated Swagger UI at `/docs` — test the API directly in the browser.*
 
 ---
 
@@ -10,31 +12,100 @@ API key management.
 
 Base URL: `https://llm-ask-api.onrender.com/`
 
-> **Note on cold starts:** The free Render tier sleeps after 15 minutes 
-> of inactivity. First request after idle takes 30–60 seconds. 
-> Subsequent requests respond in 2–6 seconds.
+> **Cold start:** Free tier sleeps after 15 min inactivity — first request takes 30–60 sec.
 
 ---
 
 ## What it does
 
-Exposes two endpoints:
+- Wraps Claude (Anthropic) behind a clean REST API with GET and POST endpoints
+- Returns structured JSON responses with the original question and generated answer
+- Validates input, handles authentication errors, and returns standard HTTP status codes
+- Deployable on any cloud platform (Render, Railway, Fly.io) via environment variables
+- Interactive API docs auto-generated at `/docs` (Swagger UI)
 
-- `GET /ask?q=your+question` — accepts a question as a URL query parameter
-- `POST /ask` — accepts a question as a JSON body
+---
 
-Both call the Anthropic Claude API and return a JSON response containing 
-the original question and Claude's answer.
+## How it works
 
-![FastAPI Interactive Documentation Demo](./assets/fastapi-docs-demo.png)
+A client request flows through three layers before returning a response:
+
+**Input validation:** FastAPI's Pydantic model validates the incoming request 
+before any API call is made. For GET requests, an empty or missing `q` parameter 
+returns a 400 immediately. For POST requests, the `Question` model enforces that 
+`text` is a non-empty string. This prevents malformed requests from consuming 
+Anthropic API tokens.
+
+**Claude API call:** The validated question is passed to `client.messages.create()` 
+using the Anthropic Python SDK. The service uses Claude Haiku 4.5 
+(`claude-haiku-4-5-20251001`) for low-latency, cost-efficient responses. 
+The API key is read from the environment at startup — never hardcoded.
+
+**Response formatting:** Claude's response is extracted from 
+`message.content[0].text` and returned as a structured JSON object containing 
+both the original question and the generated answer. This makes responses 
+predictable and easy to parse programmatically.
+
+**Error handling:** Anthropic API errors (authentication failures, rate limits, 
+timeouts) are caught and mapped to appropriate HTTP status codes so clients 
+receive actionable error responses rather than generic 500s.
+
+---
+
+## Implementation highlights
+
+- Dual endpoint design (GET + POST) covers both browser-accessible and 
+  programmatic use cases with a single service
+- Pydantic model validation on POST requests catches malformed input before 
+  it reaches the Claude API, reducing unnecessary API spend
+- Environment variable API key management means the service is deployable 
+  anywhere without code changes
+- Standard HTTP status codes (400, 401, 429, 500) map to specific failure 
+  modes so clients can handle errors programmatically
+- FastAPI's automatic OpenAPI generation provides a zero-maintenance 
+  interactive test UI at `/docs`
+
+---
+
+## Limitations
+
+- Render free tier sleeps after 15 minutes of inactivity; first request 
+  after idle takes 30–60 seconds
+- No authentication layer — any caller with the URL can use the endpoint 
+  (suitable for demos; production deployments should add API key auth or rate limiting)
+- Stateless by design — each request is independent with no conversation history 
+  (this is intentional for a simple Q&A API; multi-turn use cases should 
+  use the Streamlit demo instead)
+- No streaming — responses return only after Claude has finished generating 
+  (latency scales with answer length)
+
+---
+
+## Quick start
+
+No setup required to test the live API. Open this URL in any browser:
+
+    https://llm-ask-api.onrender.com/ask?q=what+is+retrieval+augmented+generation
+
+Or with curl:
+
+    curl -X POST https://llm-ask-api.onrender.com/ask \
+      -H "Content-Type: application/json" \
+      -d '{"text": "what is fastapi"}'
+
+For local development, see [Local setup](#local-setup) below.
 
 ---
 
 ## Requirements
+
 - Python 3.13+
 - Git
 - An Anthropic API key ([get one here](https://console.anthropic.com))
 
+Dependencies are listed in `requirements.txt`. See [Tech stack](#tech-stack) below.
+
+---
 
 ## Local setup
 
@@ -65,7 +136,7 @@ the original question and Claude's answer.
 
 Open `.env` and replace the placeholder with your actual Anthropic API key:
 
-    ANTHROPIC_API_KEY=sk-ant-api03-your-actual-key-here
+    ANTHROPIC_API_KEY=your_actual_api_key_here
 
 
 ---
@@ -102,7 +173,6 @@ Returns a Claude-generated answer to a question passed as a query parameter.
 **Example — browser:**
 
     https://llm-ask-api.onrender.com/ask?q=what+is+fastapi
- 
 
 ---
 
@@ -185,7 +255,7 @@ The API returns standard HTTP error codes:
 
 ## Deployment
 
-This service is deployed on Render as a Python web service.
+This service is deployed on Render as a Python web service. Render was chosen over alternatives (Railway, Fly.io) for its free tier and zero-config Python web service detection.
 
 **To deploy your own instance:**
 

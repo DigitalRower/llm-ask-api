@@ -35,3 +35,5 @@ def _ask_claude(text: str):
     except Exception:
         # 500 Internal Server Error for unhandled logic failures
         raise HTTPException(status_code=500, detail="Internal Server Error")
+
+        
