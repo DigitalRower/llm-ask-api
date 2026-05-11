@@ -11,9 +11,18 @@ from slowapi.errors import RateLimitExceeded
 load_dotenv() # reads .env from current directory
 
 app = FastAPI()
-limiter = Limiter(key_func=get_remote_address)
+
+# Custom function to get real client IP on Render (which proxies requests)
+def get_client_ip(request):
+    forwarded_for = request.headers.get("X-Forwarded-For")
+    if forwarded_for:
+        return forwarded_for.split(",")[0].strip()
+    return get_remote_address(request)
+
+limiter = Limiter(key_func=get_client_ip)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
 client = Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
 
 class Question(BaseModel):
