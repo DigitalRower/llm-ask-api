@@ -1,23 +1,32 @@
 import os
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel
 from anthropic import Anthropic, APIError
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
+
 
 load_dotenv() # reads .env from current directory
 
 app = FastAPI()
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 client = Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
 
 class Question(BaseModel):
     text: str
 
 @app.get("/ask")
-def ask_get(q: str):
+@limiter.limit("10/minute")
+def ask_get(request: Request, q: str):
     return _ask_claude(q)
 
 @app.post("/ask")
-def ask_post(question: Question):
+@limiter.limit("10/minute")
+def ask_post(request: Request, question: Question):
     return _ask_claude(question.text)
 
 def _ask_claude(text: str):
