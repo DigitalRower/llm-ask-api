@@ -52,6 +52,16 @@ receive actionable error responses rather than generic 500s.
 
 ---
 
+## Rate limiting
+
+The API enforces a rate limit of **10 requests per minute per IP address** to prevent abuse and manage API costs. This limit applies to both GET and POST endpoints.
+
+When the limit is exceeded, the server returns HTTP 429 (Too Many Requests). Clients should implement exponential backoff and retry after a short delay.
+
+On Render's free tier, the rate limit is applied per client IP using the `X-Forwarded-For` header, so each user has an independent 10-request/minute budget.
+
+---
+
 ## Implementation highlights
 
 - Dual endpoint design (GET + POST) covers both browser-accessible and 
@@ -72,12 +82,14 @@ receive actionable error responses rather than generic 500s.
 - Render free tier sleeps after 15 minutes of inactivity; first request 
   after idle takes 30–60 seconds
 - No authentication layer — any caller with the URL can use the endpoint 
-  (suitable for demos; production deployments should add API key auth or rate limiting)
+  (rate limited to 10 requests/minute per IP to prevent abuse)
 - Stateless by design — each request is independent with no conversation history 
   (this is intentional for a simple Q&A API; multi-turn use cases should 
   use the Streamlit demo instead)
 - No streaming — responses return only after Claude has finished generating 
   (latency scales with answer length)
+- Rate limiting (10 requests/minute per IP) prevents abuse and manages API costs 
+  without requiring authentication
 
 ---
 
