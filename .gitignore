@@ -1,34 +1,38 @@
-# --- Python/Environment - Generated build artifacts ---
+# =============================================================
+# Sections tagged [PROJECT-SPECIFIC] are meant to be trimmed
+# or replaced per project. Everything above them is universal.
+# =============================================================
+
+# --- Python build artifacts ---
 __pycache__/
 *.pyc
-venv/
-.env/
 dist/
 build/
 *.egg-info/
 
-# Virtual environment
+# --- Virtual environments ---
 .venv/
 venv/
+.env/
 
-# --- OS / IDE files ---
+# --- Secrets / environment variables (NEVER commit) ---
+.env
+.env.local
+.env.*.local
+*.pem
+keys/
+secrets.json
+
+# --- OS / IDE / tooling ---
 .DS_Store
 Thumbs.db
 .vscode/
 .idea/
 .ipynb_checkpoints/
+.claude/
+CLAUDE.local.md
 
-# Environment variables — NEVER commit
-.env
-.env.local
-.env.*.local
-
-# --- Sensitive Data ---
-*.pem
-keys/
-secrets.json
-
-# --- ML Artifacts/Data ---
+# --- ML artifacts & datasets ---
 data/
 models/
 checkpoints/
@@ -37,5 +41,3 @@ checkpoints/
 *.bin
 *.parquet
 *.csv
-
-
