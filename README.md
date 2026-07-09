@@ -1,10 +1,10 @@
-# LLM Ask API — Claude-Powered Question Answering Service
+# LLM Ask API: Claude-Powered Question Answering Service
 
 A production-ready REST API built with FastAPI that wraps Anthropic's Claude to answer natural language questions. Deployed on Render with environment variable security and structured JSON responses.
 
 ![FastAPI interactive docs showing GET and POST /ask endpoints](./assets/fastapi-docs-demo.png)
 
-*FastAPI's auto-generated Swagger UI at `/docs` — test the API directly in the browser.*
+*FastAPI's auto-generated Swagger UI at `/docs`. Test the API directly in the browser.*
 
 ---
 
@@ -12,7 +12,7 @@ A production-ready REST API built with FastAPI that wraps Anthropic's Claude to 
 
 Base URL: `https://llm-ask-api.onrender.com/`
 
-> **Cold start:** Free tier sleeps after 15 min inactivity — first request takes 30–60 sec.
+> **Cold start:** Free tier sleeps after 15 min inactivity. First request takes 30-60 sec.
 
 ---
 
@@ -39,7 +39,7 @@ Anthropic API tokens.
 **Claude API call:** The validated question is passed to `client.messages.create()` 
 using the Anthropic Python SDK. The service uses Claude Haiku 4.5 
 (`claude-haiku-4-5-20251001`) for low-latency, cost-efficient responses. 
-The API key is read from the environment at startup — never hardcoded.
+The API key is read from the environment at startup, never hardcoded.
 
 **Response formatting:** Claude's response is extracted from 
 `message.content[0].text` and returned as a structured JSON object containing 
@@ -80,13 +80,13 @@ On Render's free tier, the rate limit is applied per client IP using the `X-Forw
 ## Limitations
 
 - Render free tier sleeps after 15 minutes of inactivity; first request 
-  after idle takes 30–60 seconds
-- No authentication layer — any caller with the URL can use the endpoint 
+  after idle takes 30-60 seconds
+- No authentication layer, so any caller with the URL can use the endpoint 
   (rate limited to 10 requests/minute per IP to prevent abuse)
-- Stateless by design — each request is independent with no conversation history 
+- Stateless by design, so each request is independent with no conversation history 
   (this is intentional for a simple Q&A API; multi-turn use cases should 
   use the Streamlit demo instead)
-- No streaming — responses return only after Claude has finished generating 
+- No streaming, so responses return only after Claude has finished generating 
   (latency scales with answer length)
 - Rate limiting (10 requests/minute per IP) prevents abuse and manages API costs 
   without requiring authentication
@@ -163,6 +163,22 @@ Interactive API docs available at `http://localhost:8000/docs`
 
 ---
 
+## Run with Docker
+
+Build the image and run it locally. Secrets are injected at runtime, never baked into the image.
+
+    docker build -t llm-ask-api:latest .
+    docker run --rm -p 8000:8000 --env-file .env llm-ask-api:latest
+
+The server is at `http://localhost:8000`, with interactive docs at `http://localhost:8000/docs`. Stop it with Ctrl-C (`--rm` removes the container on exit).
+
+Verify both routes return `{"question": ..., "answer": ...}`:
+
+    curl "localhost:8000/ask?q=what+is+fastapi"
+    curl -X POST localhost:8000/ask -H "Content-Type: application/json" -d '{"text":"what is fastapi"}'
+
+---
+
 ## API reference
 
 ### GET /ask
@@ -182,7 +198,7 @@ Returns a Claude-generated answer to a question passed as a query parameter.
 }
 ```
 
-**Example — browser:**
+**Example (browser):**
 
     https://llm-ask-api.onrender.com/ask?q=what+is+fastapi
 
@@ -210,13 +226,13 @@ Returns a Claude-generated answer to a question passed as a JSON body.
 }
 ```
 
-**Example — curl:**
+**Example (curl):**
 
     curl -X POST https://llm-ask-api.onrender.com/ask \
       -H "Content-Type: application/json" \
       -d '{"text": "what is retrieval augmented generation"}'
 
-**Example — Python:**
+**Example (Python):**
 
 ```python
 import requests
@@ -237,10 +253,10 @@ The API returns standard HTTP error codes:
 | Status | Meaning |
 |--------|---------|
 | 200 | Success |
-| 400 | Bad request — missing or empty question |
-| 401 | Authentication error — invalid API key |
-| 429 | Rate limit reached — retry after a moment |
-| 500 | Internal server error — check server logs |
+| 400 | Bad request, missing or empty question |
+| 401 | Authentication error, invalid API key |
+| 429 | Rate limit reached, retry after a moment |
+| 500 | Internal server error, check server logs |
 
 ---
 
@@ -258,10 +274,10 @@ The API returns standard HTTP error codes:
 
 ## Tech stack
 
-- [FastAPI](https://fastapi.tiangolo.com/) — Python web framework
-- [Anthropic Python SDK](https://github.com/anthropics/anthropic-sdk-python) — Claude API client
-- [python-dotenv](https://github.com/theskumar/python-dotenv) — Environment variable management
-- [Render](https://render.com/) — Cloud deployment (free tier)
+- [FastAPI](https://fastapi.tiangolo.com/), Python web framework
+- [Anthropic Python SDK](https://github.com/anthropics/anthropic-sdk-python), Claude API client
+- [python-dotenv](https://github.com/theskumar/python-dotenv), environment variable management
+- [Render](https://render.com/), cloud deployment (free tier)
 
 ---
 
@@ -293,6 +309,3 @@ See `.env.example` for the template.
 ## License
 
 MIT
-
-
-    
