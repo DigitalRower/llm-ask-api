@@ -165,6 +165,15 @@ Interactive API docs available at `http://localhost:8000/docs`
 
 ## Run with Docker
 
+**Pull the published image** (skip the build if you just want to run it):
+
+    docker pull digitalrower/llm-ask-api:latest
+
+    docker run --rm -p 8000:8000 --env-file .env digitalrower/llm-ask-api:latest
+
+Or build locally:
+
+
 Build the image and run it locally. Secrets are injected at runtime, never baked into the image.
 
     docker build -t llm-ask-api:latest .
