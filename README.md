@@ -262,9 +262,9 @@ The API returns standard HTTP error codes:
 | Status | Meaning |
 |--------|---------|
 | 200 | Success |
-| 400 | Bad request, missing or empty question |
-| 401 | Authentication error, invalid API key |
+| 422 | Invalid request, missing or empty question |
 | 429 | Rate limit reached, retry after a moment |
+| 502 | Upstream error from the Anthropic API, including invalid API key |
 | 500 | Internal server error, check server logs |
 
 ---
